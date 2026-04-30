@@ -19,11 +19,10 @@ void GotoXY(int x, int y) {
 }
 
 // 커서 숨기기
-void CursorView(char show)
-{
+void CursorView(char show) {
 	CONSOLE_CURSOR_INFO ConsoleCursor;
-	ConsoleCursor.bVisible = show;
-	ConsoleCursor.dwSize = 1;
+	ConsoleCursor.bVisible = show; // true: 커서 O, false: 커서 X
+	ConsoleCursor.dwSize = 1; // 커서 크기 지정
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleCursor);
 }
 
@@ -40,12 +39,13 @@ int main(void) {
 
 			int nkey = _getch();
 
+			// ENTER 입력 시 해당 위치에 별 출력
 			if (nkey == ENTER) {
 				GotoXY(x, y);
 				printf("★");
-				//system("cls");
 			}
 
+			// 방향키 입력 시 위치 조정
 			if (nkey == ARROW) {
 				nkey = _getch();
 
@@ -65,7 +65,6 @@ int main(void) {
 				}
 			}
 		}
-
 	}
 
 	return 0;
