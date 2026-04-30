@@ -10,6 +10,25 @@
 #define SPACEBAR 32
 #define ENTER 13
 
+typedef enum {
+	BLACK,
+	DARKBLUE,
+	DARKGREEN,
+	DARKSKYBLUE,
+	DARKRED,
+	DARKPURPLE,
+	DARKYELLOW,
+	GRAY,
+	DARKGRAY,
+	BLUE,
+	GREEN,
+	SKYBLUE,
+	RED,
+	PURPLE,
+	YELLOW,
+	WHITE
+} Color;
+
 // 원하는 위치로 이동
 void GotoXY(int x, int y) {
 	COORD Pos;
@@ -24,6 +43,11 @@ void CursorView(char show) {
 	ConsoleCursor.bVisible = show; // true: 커서 O, false: 커서 X
 	ConsoleCursor.dwSize = 1; // 커서 크기 지정
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &ConsoleCursor);
+}
+
+// 글자 색 바꾸기
+void TextColor(Color color) {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
 int x = 30;
@@ -42,6 +66,7 @@ int main(void) {
 			// ENTER 입력 시 해당 위치에 별 출력
 			if (nkey == ENTER) {
 				GotoXY(x, y);
+				TextColor(GREEN);
 				printf("★");
 			}
 
