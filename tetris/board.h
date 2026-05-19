@@ -1,6 +1,6 @@
 ﻿#ifndef BOARD_H
 #define BOARD_H
 
-void DrawBoarder(void);
+void DrawBoard(void);
 
 #endif
