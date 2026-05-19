@@ -38,7 +38,7 @@ void DrawBorder() {
 // DrawBoard: 게임 루프에서 매 프레임 호출
 void DrawBoard() {
     for (int row = 0; row < BOARD_ROWS; row++) {
-        MoveCursor(BOARD_ORIGIN_X + 1, BOARD_ORIGIN_Y + 1 + row);
+        GotoXY(BOARD_ORIGIN_X + 1, BOARD_ORIGIN_Y + 1 + row);
         for (int col = 0; col < BOARD_COLS; col++) {
             if (board[row][col] == 2)
                 printf("■");  // 고정된 블록
