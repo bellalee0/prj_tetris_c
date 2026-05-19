@@ -28,7 +28,7 @@ int board[BOARD_ROWS][BOARD_COLS] = {
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
-void DrawBoard(void) {
+void DrawBorder(void) {
 
 	for (int i = 0; i < BOARD_ROWS; i++) {
 
