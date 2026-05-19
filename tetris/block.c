@@ -143,7 +143,7 @@ void PrintBlock(int a, int b, int c, int d) {
 		for (int d = 0; d < BLOCK_SIZE; d++) {
 			GotoXY(d * 2, c);
 			if (Blocks[a][b][c][d] == 2) {
-				printf("��");
+				printf("[]");
 			}
 		}
 	}

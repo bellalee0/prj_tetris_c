@@ -62,7 +62,7 @@ void RunGame(void) {
         if (nkey == ENTER) {
             GotoXY(x, y);
             TextColor(GREEN);
-            printf("■");
+            printf("[]");
             fflush(stdout);
         }
 
