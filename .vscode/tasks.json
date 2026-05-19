@@ -2,22 +2,33 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "CMake Configure",
+            "type": "shell",
+            "command": "cmake -S . -B build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
             "label": "Build Tetris",
             "type": "shell",
-            "command": "clang",
-            "args": [
-                "main.c",
-                "game.c",
-                "console.c",
-                "-o",
-                "game"
-            ],
+            "command": "cmake --build build",
             "options": {
-                "cwd": "${workspaceFolder}/tetris"
+                "cwd": "${workspaceFolder}"
             },
+            "dependsOn": "CMake Configure",
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
             }
         }
     ]

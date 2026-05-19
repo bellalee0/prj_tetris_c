@@ -1,8 +1,115 @@
 # 테트리스 C 프로젝트 — 단계별 개발 로드맵
 
-> 플랫폼: macOS (clang 빌드, lldb 디버깅)  
-> 언어: C (C99)  
+> 플랫폼: macOS / Windows (CMake 크로스플랫폼 빌드)  
+> 언어: C (C11)  
 > 목표: 터미널에서 동작하는 완성형 테트리스 게임
+
+---
+
+## CMake 빌드 환경 설정
+
+### 개요
+
+이 프로젝트는 CMake를 사용해 macOS와 Windows 양쪽에서 동일한 소스로 빌드한다.  
+소스 파일 목록은 `CMakeLists.txt` 한 곳에서만 관리하며, 각 플랫폼의 빌드 파일(Makefile / .sln)은 `build/` 폴더 안에 자동 생성된다.
+
+```
+prj_tetris_c/
+├── CMakeLists.txt   ← 소스 파일 목록 관리 (플랫폼 공통)
+├── build/           ← 자동 생성, git에서 제외
+│   ├── tetris       ← 실행 파일 (macOS)
+│   └── tetris.exe   ← 실행 파일 (Windows)
+└── tetris/          ← 소스 파일
+    ├── main.c
+    ├── block.c / .h
+    ├── console.c / .h
+    └── game.c / .h
+```
+
+---
+
+### macOS 환경 설정
+
+#### 사전 준비 (최초 1회)
+
+CMake 설치:
+```bash
+brew install cmake
+```
+
+빌드 폴더 초기화 (최초 1회 또는 CMakeLists.txt 구조 변경 시):
+```bash
+cmake -S . -B build
+```
+
+#### 빌드 및 실행
+
+```bash
+cmake --build build   # 빌드
+./build/tetris        # 실행
+```
+
+#### VSCode에서 빌드
+
+`Cmd+Shift+B` — "Build Tetris" 태스크 실행 (configure + build 자동 수행)  
+`F5` — 빌드 후 lldb 디버거로 실행
+
+---
+
+### Windows 환경 설정
+
+#### 사전 준비 (최초 1회)
+
+1. [cmake.org/download](https://cmake.org/download) 에서 CMake 설치 (또는 Visual Studio 설치 시 함께 포함됨)
+2. PowerShell 또는 개발자 명령 프롬프트에서 프로젝트 루트로 이동 후 실행:
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022"
+```
+
+> Visual Studio 버전에 따라 Generator 이름이 다르다:
+> - Visual Studio 2022: `"Visual Studio 17 2022"`
+> - Visual Studio 2019: `"Visual Studio 16 2019"`
+
+3. `build/tetris.sln` 이 생성되면 Visual Studio에서 열어서 사용
+
+#### 빌드 및 실행
+
+**방법 A — Visual Studio에서 직접 (권장)**  
+`build/tetris.sln` 열기 → `Ctrl+Shift+B` (빌드) → `F5` (실행)
+
+**방법 B — 명령줄**
+```powershell
+cmake --build build --config Debug
+```
+
+#### Visual Studio에서 CMake 직접 열기 (VS 2019 이상)
+
+`파일 > 열기 > CMake...` → 프로젝트 루트의 `CMakeLists.txt` 선택  
+이 방식에서는 `.sln` 없이 VS가 CMake를 직접 읽고, `CMakeLists.txt` 수정 시 자동으로 프로젝트를 갱신한다.
+
+---
+
+### 소스 파일 추가 방법
+
+새 `.c` / `.h` 파일을 추가할 때는 `CMakeLists.txt`의 `add_executable` 목록에 파일명을 추가한다.
+
+```cmake
+add_executable(tetris
+    tetris/main.c
+    tetris/block.c
+    tetris/console.c
+    tetris/game.c
+    tetris/새파일.c   # ← 여기에 추가
+)
+```
+
+이후:
+- **macOS**: 다음 `cmake --build build` 실행 시 자동 반영
+- **Windows (명령줄)**: `cmake -S . -B build -G "Visual Studio 17 2022"` 재실행 후 빌드
+- **Windows (VS에서 CMake 직접 열기)**: 저장 시 VS가 자동으로 갱신
+
+---
 
 ---
 
@@ -208,10 +315,4 @@ I 블록:        O 블록:        T 블록:
 
 ## 참고 — 빌드 방법
 
-```bash
-cd tetris
-clang main.c game.c console.c -o game
-./game
-```
-
-또는 VSCode에서 `Cmd+Shift+B` (Build Tetris 태스크 실행)
+빌드 방법은 상단 **CMake 빌드 환경 설정** 섹션을 참고한다.
