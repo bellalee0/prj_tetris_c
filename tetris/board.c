@@ -5,41 +5,32 @@
 #define BOARD_ROWS 20
 #define BOARD_COLS 10
 
-int board[BOARD_ROWS][BOARD_COLS] = {
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-};
+// 보드 원점 (터미널 화면에서 보드가 시작되는 위치)
+#define BOARD_ORIGIN_X 2
+#define BOARD_ORIGIN_Y 1
 
-void DrawBorder(void) {
+int board[BOARD_ROWS][BOARD_COLS];  // 0 = 빈칸, 1 이상 = 고정된 블록
 
-	for (int i = 0; i < BOARD_ROWS; i++) {
+// DrawBorder: 게임 시작 시 1회 호출
+void DrawBorder() {
 
-		for (int j = 0; j < BOARD_COLS; j++) {
+    // 윗벽
+    GotoXY(BOARD_ORIGIN_X, BOARD_ORIGIN_Y);
+    printf("┌");
+    for (int i = 0; i < BOARD_COLS; i++) printf("──");
+    printf("┐");
 
-			GotoXY(j * 2, i);
+    // 양 옆벽 (각 행마다)
+    for (int row = 0; row < BOARD_ROWS; row++) {
+        GotoXY(BOARD_ORIGIN_X, BOARD_ORIGIN_Y + 1 + row);
+        printf("│");
+        GotoXY(BOARD_ORIGIN_X + 1 + BOARD_COLS * 2, BOARD_ORIGIN_Y + 1 + row);
+        printf("│");
+    }
 
-			if (board[i][j] == 1)
-				printf("■");
-			else
-				printf("  ");
-		}
-	}
+    // 아랫벽
+    GotoXY(BOARD_ORIGIN_X, BOARD_ORIGIN_Y + 1 + BOARD_ROWS);
+    printf("└");
+    for (int i = 0; i < BOARD_COLS; i++) printf("──");
+    printf("┘");
 }

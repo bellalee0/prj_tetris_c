@@ -3,7 +3,7 @@
 
 int main(void) {
 
-    DrawBoard();
+    DrawBorder();
 
     return 0;
 }
