@@ -8,7 +8,7 @@
 #define BLOCK_SIZE 4
 
 int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
-	// OπÃ≥Î (ªÁ∞¢«¸)
+	// OÎØ∏ÎÖ∏ (ÏÇ¨Í∞ÅÌòï)
 	0,0,0,0, // 0
 	0,2,2,0,
 	0,2,2,0,
@@ -26,7 +26,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,2,2,0,
 	0,0,0,0,
 	
-	// IπÃ≥Î (¡˜º±)
+	// IÎØ∏ÎÖ∏ (ÏßÅÏÑ†)
 	0,0,0,0, // 0
 	2,2,2,2,
 	0,0,0,0,
@@ -44,7 +44,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,0,2,0,
 	0,0,2,0,
 	
-	// SπÃ≥Î (∞≈≤Ÿ∑Œµ» §©)
+	// SÎØ∏ÎÖ∏ (Í±∞Íæ∏Î°úÎêú „Ñπ)
 	0,0,0,0, // 0
 	0,0,2,2,
 	0,2,2,0,
@@ -62,7 +62,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,0,0,2,
 	0,0,0,0,
 	
-	// ZπÃ≥Î (§©)
+	// ZÎØ∏ÎÖ∏ („Ñπ)
 	0,0,0,0, // 0
 	0,2,2,0,
 	0,0,2,2,
@@ -80,7 +80,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,0,2,0,
 	0,0,0,0,
 	
-	// LπÃ≥Î (∞≈≤Ÿ∑Œµ» §°)
+	// LÎØ∏ÎÖ∏ (Í±∞Íæ∏Î°úÎêú „Ñ±)
 	0,0,0,0, // 0
 	0,2,2,2,
 	0,2,0,0,
@@ -98,7 +98,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,0,2,0,
 	0,0,0,0,
 	
-	// JπÃ≥Î (§°)
+	// JÎØ∏ÎÖ∏ („Ñ±)
 	0,0,0,0, // 0
 	2,2,2,0,
 	0,0,2,0,
@@ -116,7 +116,7 @@ int Blocks[BLOCK_KINDS][BLOCK_ROTATE][BLOCK_SIZE][BLOCK_SIZE] = {
 	0,2,2,0,
 	0,0,0,0,
 	
-	// TπÃ≥Î (§Ã)
+	// TÎØ∏ÎÖ∏ („Öú)
 	0,0,0,0, // 0
 	0,2,2,2,
 	0,0,2,0,
@@ -143,7 +143,22 @@ void PrintBlock(int a, int b, int c, int d) {
 		for (int d = 0; d < BLOCK_SIZE; d++) {
 			GotoXY(d * 2, c);
 			if (Blocks[a][b][c][d] == 2) {
-				printf("°·");
+				printf("ÔøΩÔøΩ");
+			}
+		}
+	}
+}
+
+
+#else
+
+void PrintBlock(int a, int b, int c, int d) {
+
+	for (int c = 0; c < BLOCK_SIZE; c++) {
+		for (int d = 0; d < BLOCK_SIZE; d++) {
+			GotoXY(d * 2, c);
+			if (Blocks[a][b][c][d] == 2) {
+				printf("##");
 			}
 		}
 	}
