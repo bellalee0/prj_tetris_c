@@ -27,6 +27,9 @@
     <ClCompile Include="block.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="board.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="block.h">
@@ -36,6 +39,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="game.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="board.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
