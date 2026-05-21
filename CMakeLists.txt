@@ -5,10 +5,8 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(tetris
     tetris/main.c
-    tetris/block.c
     tetris/console.c
     tetris/game.c
-    tetris/board.c
 )
 
 target_include_directories(tetris PRIVATE tetris)
