@@ -1,9 +1,9 @@
-﻿#include "board.h"
+﻿#include "game.h"
 #include <stdio.h>
 
 int main(void) {
 
-    DrawBorder();
+    RunGame();
 
     return 0;
 }
