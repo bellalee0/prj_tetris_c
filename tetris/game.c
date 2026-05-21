@@ -51,6 +51,8 @@ int GetKey() {
 
 // DrawBorder: 게임 진행 영역 테두리 출력
 void DrawBorder() {
+    
+    TextColor(WHITE);
 
     GotoXY(BOARD_ORIGIN_X, BOARD_ORIGIN_Y);
     printf("┌");
@@ -117,7 +119,7 @@ void RunGame(void) {
     DrawBorder();
 
     ActiveBlock example = {
-        .tetromino = BLOCK_I,
+        .tetromino = BLOCK_O,
         .x = 10,
         .y = 1
     };
