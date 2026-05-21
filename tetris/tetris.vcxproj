@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="block.c" />
     <ClCompile Include="console.c" />
     <ClCompile Include="game.c" />
     <ClCompile Include="main.c" />

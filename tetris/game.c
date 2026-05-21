@@ -1,5 +1,6 @@
 ﻿#include "game.h"
 #include "console.h"
+#include "block.h"
 
 #include <stdio.h>
 
@@ -82,12 +83,34 @@ void DrawBoard() {
     }
 }
 
+void DrawTetromino(ActiveBlock activeBlock) {
+
+    GotoXY(activeBlock.x, activeBlock.y);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (activeBlock.tetromino.shape[i][j] == 2) {
+                TextColor(activeBlock.tetromino.color);
+                printf("■");
+            }
+            else {
+                printf("  ");
+            }
+        }
+    }
+}
 
 void RunGame(void) {
 
     CursorView(0);
     DrawBorder();
 
+    ActiveBlock example = {
+        .tetromino = BLOCK_I,
+        .x = 3,
+        .y = 3
+    };
+
+    DrawTetromino(example);
 }
 
 
