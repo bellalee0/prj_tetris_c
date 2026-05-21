@@ -30,6 +30,21 @@
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "Run Tetris",
+            "type": "shell",
+            "command": "./build/tetris",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "Build Tetris",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": true
+            }
         }
     ]
 }
