@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <conio.h>
+#include <Windows.h>
 #else
 #include <termios.h>
 #include <unistd.h>
@@ -89,10 +90,21 @@ void DrawTetromino(ActiveBlock activeBlock) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (activeBlock.tetromino.shape[i][j] == 2) {
+                GotoXY(activeBlock.x+j, activeBlock.y+i);
                 TextColor(activeBlock.tetromino.color);
                 printf("■");
             }
-            else {
+        }
+    }
+}
+
+void EraseTetromino(ActiveBlock activeBlock) {
+
+    GotoXY(activeBlock.x, activeBlock.y);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (activeBlock.tetromino.shape[i][j] == 2) {
+                GotoXY(activeBlock.x + j, activeBlock.y + i);
                 printf("  ");
             }
         }
@@ -106,11 +118,13 @@ void RunGame(void) {
 
     ActiveBlock example = {
         .tetromino = BLOCK_I,
-        .x = 3,
-        .y = 3
+        .x = 10,
+        .y = 1
     };
 
     DrawTetromino(example);
+    Sleep(5000);
+    EraseTetromino(example);
 }
 
 
