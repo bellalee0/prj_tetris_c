@@ -92,7 +92,7 @@ void DrawTetromino(ActiveBlock activeBlock) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (activeBlock.tetromino.shape[i][j] == 2) {
-                GotoXY(activeBlock.x+j, activeBlock.y+i);
+                GotoXY(activeBlock.x + j * 2, activeBlock.y+i);
                 TextColor(activeBlock.tetromino.color);
                 printf("■");
             }
@@ -106,7 +106,7 @@ void EraseTetromino(ActiveBlock activeBlock) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (activeBlock.tetromino.shape[i][j] == 2) {
-                GotoXY(activeBlock.x + j, activeBlock.y + i);
+                GotoXY(activeBlock.x + j * 2, activeBlock.y + i);
                 printf("  ");
             }
         }
