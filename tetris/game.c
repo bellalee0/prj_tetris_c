@@ -3,6 +3,8 @@
 #include "block.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -86,6 +88,7 @@ void DrawBoard() {
     }
 }
 
+// DrawTetromino: 블록 출력
 void DrawTetromino(ActiveBlock activeBlock) {
 
     GotoXY(activeBlock.x, activeBlock.y);
@@ -100,6 +103,7 @@ void DrawTetromino(ActiveBlock activeBlock) {
     }
 }
 
+// EraseTetromino: 블록 지우기
 void EraseTetromino(ActiveBlock activeBlock) {
 
     GotoXY(activeBlock.x, activeBlock.y);
@@ -113,20 +117,60 @@ void EraseTetromino(ActiveBlock activeBlock) {
     }
 }
 
+// SpawnTetromino: 7종 중 랜덤 블록 생성
+ActiveBlock SpawnTetromino() {
+
+    srand(time(NULL));
+
+    int block_type = rand() % 7;
+
+    Tetromino tetromino;
+
+    switch (block_type) {
+        case 0:
+            tetromino = BLOCK_I;
+            break;
+        case 1:
+            tetromino = BLOCK_O;
+            break;
+        case 2:
+            tetromino = BLOCK_T;
+            break;
+        case 3:
+            tetromino = BLOCK_J;
+            break;
+        case 4:
+            tetromino = BLOCK_L;
+            break;
+        case 5:
+            tetromino = BLOCK_S;
+            break;
+        case 6:
+            tetromino = BLOCK_Z;
+            break;
+    }
+
+    ActiveBlock activeBlock = {
+        .tetromino = tetromino,
+        .x = BOARD_ORIGIN_X + BOARD_COLS / 2,
+        .y = BOARD_ORIGIN_Y
+    };
+
+    return activeBlock;
+}
+
 void RunGame(void) {
 
     CursorView(0);
     DrawBorder();
 
-    ActiveBlock example = {
-        .tetromino = BLOCK_O,
-        .x = 10,
-        .y = 1
-    };
+    for (int i = 0; i < 10; i++) {
+        ActiveBlock tetromino = SpawnTetromino();
 
-    DrawTetromino(example);
-    Sleep(5000);
-    EraseTetromino(example);
+        DrawTetromino(tetromino);
+        Sleep(5000);
+        EraseTetromino(tetromino);
+    }
 }
 
 
