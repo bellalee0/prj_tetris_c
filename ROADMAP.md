@@ -6,6 +6,21 @@
 
 ---
 
+## 현재 진행 상태
+
+| 단계 | 상태 |
+|------|------|
+| Step 1 — 입력 시스템 수정 | ⬜ 미완료 (우선 처리 필요) |
+| Step 2 — 게임 보드 그리기 | ✅ 완료 |
+| Step 3 — 테트로미노 정의 | 🔧 일부 완료 (리팩토링 필요) |
+| Step 4 — 블록 이동과 회전 | ⬜ 미완료 |
+| Step 5 — 충돌 감지 | ⬜ 미완료 |
+| Step 6 — 블록 고정과 자동 낙하 | ⬜ 미완료 |
+| Step 7 — 라인 클리어와 점수 | ⬜ 미완료 |
+| Step 8 — 게임 오버와 다음 블록 미리보기 | ⬜ 미완료 |
+
+---
+
 ## CMake 빌드 환경 설정
 
 ### 개요
@@ -21,7 +36,7 @@ prj_tetris_c/
 │   └── tetris.exe   ← 실행 파일 (Windows)
 └── tetris/          ← 소스 파일
     ├── main.c
-    ├── block.c / .h
+    ├── block.c / .h  ← Step 3에서 block.h 분리 시 추가
     ├── console.c / .h
     └── game.c / .h
 ```
@@ -97,10 +112,9 @@ cmake --build build --config Debug
 ```cmake
 add_executable(tetris
     tetris/main.c
-    tetris/block.c
+    tetris/block.c    # ← Step 3에서 추가
     tetris/console.c
     tetris/game.c
-    tetris/새파일.c   # ← 여기에 추가
 )
 ```
 
@@ -113,28 +127,70 @@ add_executable(tetris
 
 ---
 
-## Step 1 — 입력 시스템 수정
+## Step 1 — 입력 시스템 수정 ⬜
 
 ### 목표
-현재 macOS에서 방향키가 동작하지 않고 게임 루프가 멈추는 문제를 해결한다.
+macOS에서 게임 루프가 멈추는 문제를 해결하고, 색상 출력 버그(`TextColor`)를 수정한다.
 
 ### 배경 지식
-- macOS 터미널에서 방향키를 누르면 3바이트 시퀀스가 입력된다: `\033` → `[` → `A/B/C/D`
-- 현재 `GetKey()`는 `getchar()`를 사용해 blocking 방식으로 동작한다. 입력이 없으면 게임 루프 전체가 멈춘다.
-- `select()` 시스템 콜을 사용하면 입력이 없을 때 바로 리턴(non-blocking)할 수 있다.
+
+**non-blocking 입력**  
+현재 `GetKey()`는 `getchar()`를 사용해 입력이 올 때까지 루프 전체를 멈춘다.  
+`select()` 시스템 콜을 사용하면 입력이 없을 때 즉시 `-1`을 리턴해 루프가 계속 돌 수 있다.
+
+```c
+// select()를 이용한 non-blocking 입력 체크 (macOS/Linux)
+struct timeval tv = { 0, 0 };  // 대기 시간 0 → 즉시 리턴
+fd_set fds;
+FD_ZERO(&fds);
+FD_SET(STDIN_FILENO, &fds);
+if (select(1, &fds, NULL, NULL, &tv) <= 0) return -1;  // 입력 없음
+```
+
+> **⚠️ 버그 — `TextColor()` ANSI 코드 매핑 오류** (`console.c`)
+>
+> 현재 macOS `TextColor()`는 `Color` enum 값을 그대로 ANSI 코드로 사용한다:
+> ```c
+> printf("\033[%dm", color);  // YELLOW(14) → \033[14m (교체 모드), 의도와 다름
+> ```
+> ANSI 전경색 코드는 `30`~`37` (기본), `90`~`97` (밝은 색) 범위를 사용한다.  
+> `Color` enum 값(0~15)과 ANSI 코드는 별도의 매핑 테이블이 필요하다.
+>
+> ```c
+> // Color enum → ANSI 전경색 코드 매핑 예시
+> static const int ANSI_COLOR_MAP[] = {
+>     30,  // BLACK       → 검정
+>     34,  // DARKBLUE    → 파랑
+>     32,  // DARKGREEN   → 초록
+>     36,  // DARKSKYBLUE → 청록
+>     31,  // DARKRED     → 빨강
+>     35,  // DARKPURPLE  → 보라
+>     33,  // DARKYELLOW  → 노랑(어두운)
+>     37,  // GRAY        → 흰색(어두운)
+>     90,  // DARKGRAY    → 밝은 검정
+>     94,  // BLUE        → 밝은 파랑
+>     92,  // GREEN       → 밝은 초록
+>     96,  // SKYBLUE     → 밝은 청록
+>     91,  // RED         → 밝은 빨강
+>     95,  // PURPLE      → 밝은 보라
+>     93,  // YELLOW      → 밝은 노랑
+>     97,  // WHITE       → 밝은 흰색
+> };
+> ```
 
 ### 작업 내용
-- [ ] `game.c` — macOS `GetKey()` 를 non-blocking으로 교체
-- [ ] `game.c` — 방향키 ANSI escape sequence 파싱 추가 (`\033[A` = UP 등)
-- [ ] `game.c` — 방향키 상수를 macOS용으로 재정의
+- [ ] **`console.c` — macOS `TextColor()` ANSI 매핑 테이블 추가 및 적용** *(버그 수정)*
+- [ ] `game.c` — macOS `GetKey()`를 `select()` 기반 non-blocking으로 교체
+- [ ] `game.c` — ESC 또는 Q 키 입력 시 게임 루프 종료 및 터미널 상태 복구
 
 ### 완료 기준
-- 방향키로 커서가 상하좌우로 이동한다.
-- 키 입력 없이도 게임 루프가 계속 돈다 (이후 단계의 중력 구현을 위한 전제 조건).
+- 키 입력 없이도 게임 루프가 멈추지 않고 계속 돈다.
+- 색상이 의도한 대로 터미널에 출력된다.
+- ESC 또는 Q 키로 게임을 종료할 수 있다.
 
 ---
 
-## Step 2 — 게임 보드 그리기
+## Step 2 — 게임 보드 그리기 ✅
 
 ### 목표
 테트리스 게임판(보드)을 화면에 출력하고, 2D 배열로 내부 상태를 관리한다.
@@ -142,68 +198,116 @@ add_executable(tetris
 ### 배경 지식
 - 표준 테트리스 보드 크기: 가로 10칸, 세로 20칸
 - 터미널에서 블록 한 칸은 전각 문자(`■`, `□`) 1개 = 실제 터미널 폭 2칸
-- 보드 상태를 `int board[ROWS][COLS]` 2D 배열로 관리한다 (0 = 빈칸, 1 이상 = 블록 있음)
+- 보드 상태를 `int board[ROWS][COLS]` 2D 배열로 관리 (0 = 빈칸, 1 이상 = 블록 있음)
 
-### 작업 내용
-- [ ] `game.h` — 보드 크기 상수 정의 (`BOARD_ROWS 20`, `BOARD_COLS 10`)
-- [ ] `game.c` — `int board[BOARD_ROWS][BOARD_COLS]` 전역 배열 선언
-- [ ] `game.c` — `DrawBorder()` 함수: 보드 테두리(벽, 바닥) 출력
-- [ ] `game.c` — `DrawBoard()` 함수: 보드 배열 상태를 화면에 렌더링
-- [ ] `game.c` — `RunGame()` 에서 시작 시 보드 출력
-
-### 완료 기준
-- 실행하면 빈 테트리스 보드 테두리가 화면에 출력된다.
-- 보드 배열이 0으로 초기화된 상태로 준비된다.
+### 구현 현황
+- [x] `game.h` — 보드 크기 상수 정의 (`BOARD_ROWS 20`, `BOARD_COLS 10`)
+- [x] `game.h` — 보드 원점 상수 정의 (`BOARD_ORIGIN_X 2`, `BOARD_ORIGIN_Y 1`)
+- [x] `game.c` — `int board[BOARD_ROWS][BOARD_COLS]` 전역 배열 선언
+- [x] `game.c` — `DrawBorder()`: 보드 테두리(벽, 바닥) 출력
+- [x] `game.c` — `DrawBoard()`: 보드 배열 상태를 화면에 렌더링
+- [x] `game.c` — `RunGame()`에서 시작 시 보드 출력
 
 ---
 
-## Step 3 — 테트로미노 정의
+## Step 3 — 테트로미노 정의 🔧
 
 ### 목표
 7가지 테트로미노(블록) 형태를 데이터로 정의하고 화면에 출력한다.
 
 ### 배경 지식
-- 테트로미노 7종: I, O, T, S, Z, J, L
-- 각 블록은 4×4 격자 안에서 표현할 수 있다 (회전 포함 시 안전한 크기)
-- 블록 형태를 `int shape[4][4]` 2D 배열로 정의한다
+
+**테트로미노 7종과 4×4 격자 표현**  
+각 블록은 4×4 격자 안에서 표현한다. 회전 시에도 격자를 벗어나지 않아 안전하다.
 
 ```
-I 블록:        O 블록:        T 블록:
-0 0 0 0        0 1 1 0        0 1 0 0
-1 1 1 1        0 1 1 0        1 1 1 0
-0 0 0 0        0 0 0 0        0 0 0 0
-0 0 0 0        0 0 0 0        0 0 0 0
+I 블록 (SKYBLUE):     O 블록 (YELLOW):     T 블록 (PURPLE):
+0 0 0 0               0 0 0 0              0 0 0 0
+2 2 2 2               0 2 2 0              0 2 2 2
+0 0 0 0               0 2 2 0              0 0 2 0
+0 0 0 0               0 0 0 0              0 0 0 0
+
+J 블록 (DARKBLUE):    L 블록 (DARKYELLOW): S 블록 (GREEN):     Z 블록 (RED):
+0 0 0 0               0 0 0 0              0 0 0 0             0 0 0 0
+2 2 2 0               0 2 2 2              0 0 2 2             0 2 2 0
+0 0 2 0               0 2 0 0              0 2 2 0             0 0 2 2
+0 0 0 0               0 0 0 0              0 0 0 0             0 0 0 0
 ```
 
-### 작업 내용
-- [ ] `game.h` — `Tetromino` 구조체 정의: `shape[4][4]`, `x`, `y`, `color`
-- [ ] `game.c` — 7종 블록 초기 형태 데이터 배열 정의
-- [ ] `game.c` — `DrawTetromino()` 함수: 블록을 보드 위에 출력
-- [ ] `game.c` — `EraseTetromino()` 함수: 블록을 지우기 (이동 전 호출)
-- [ ] `game.c` — 새 블록 생성 시 보드 상단 중앙에 스폰
+> **⚠️ 버그 — `block.h`에 변수를 직접 정의** (`block.h`)
+>
+> 현재 `block.h`에 `Tetromino BLOCK_I = { ... }` 형태로 변수를 직접 정의하고 있다.  
+> `.h` 파일을 여러 `.c` 파일에서 `#include`하면 변수가 중복 정의되어 **링크 에러**가 발생한다.
+>
+> ```
+> 올바른 방법:
+>   block.h → extern Tetromino BLOCK_I;    // 선언만 (존재를 알림)
+>   block.c → Tetromino BLOCK_I = { ... }; // 정의 (실제 메모리 할당)
+> ```
+
+> **⚠️ 버그 — `DrawTetromino` / `EraseTetromino` 좌표 스케일 오류** (`game.c`)
+>
+> `■`(전각 문자)는 터미널에서 2칸 폭을 차지한다.  
+> 현재 코드는 `x + j`로 1칸씩만 이동하기 때문에 가로로 인접한 셀들이 겹쳐서 출력된다.
+>
+> ```c
+> // 현재 (버그):
+> GotoXY(activeBlock.x + j, activeBlock.y + i);
+>
+> // 수정 후:
+> GotoXY(activeBlock.x + j * 2, activeBlock.y + i);
+> ```
+>
+> `EraseTetromino`도 동일하게 수정해야 한다.
+
+### 구현 현황
+- [x] `block.h` — `Tetromino` 구조체 정의: `shape[4][4]`, `color`
+- [x] `block.h` — `ActiveBlock` 구조체 정의: `tetromino`, `x`, `y`
+- [x] `block.h` — 7종 블록 초기 형태 및 색상 데이터 정의
+- [x] `game.c` — `DrawTetromino()`: 블록을 화면에 출력
+- [x] `game.c` — `EraseTetromino()`: 블록을 지우기
+
+### 남은 작업 (리팩토링 포함)
+- [ ] **`block.c` 파일 생성 — 블록 변수 정의를 헤더에서 분리** *(버그 수정)*
+- [ ] **`block.h` — 블록 변수를 `extern` 선언으로 변경** *(버그 수정)*
+- [ ] **`CMakeLists.txt` — `tetris/block.c` 추가** *(버그 수정)*
+- [ ] **`game.c` — `DrawTetromino()`, `EraseTetromino()` 좌표 스케일 버그 수정 (`j * 2`)** *(버그 수정)*
+- [ ] `game.c` — `SpawnTetromino()`: 7종 중 랜덤으로 선택해 보드 상단 중앙에 생성
 
 ### 완료 기준
 - 실행하면 보드 상단에 랜덤 블록이 하나 표시된다.
-- 블록이 올바른 색상으로 출력된다.
+- 블록이 가로로 겹치지 않고 올바른 크기로 출력된다.
+- 블록이 의도한 색상으로 출력된다.
+- `block.h`를 여러 파일에서 include해도 링크 에러가 없다.
 
 ---
 
-## Step 4 — 블록 이동과 회전
+## Step 4 — 블록 이동과 회전 ⬜
 
 ### 목표
-방향키로 블록을 이동하고, 위 방향키(또는 Z 키)로 블록을 회전시킨다.
+방향키로 블록을 이동하고, 위 방향키로 블록을 회전시킨다.
 
 ### 배경 지식
-- 이동: 블록의 `x`, `y` 좌표를 변경
-- 회전: 4×4 행렬을 90도 시계 방향으로 변환
-  - `new[j][3-i] = old[i][j]` 공식 적용
-- 이동/회전 전에 `EraseTetromino()`, 후에 `DrawTetromino()` 호출
+
+**이동**  
+`ActiveBlock`의 `x`, `y` 좌표를 변경하기 전에 `EraseTetromino()`로 지우고, 변경 후 `DrawTetromino()`로 다시 그린다. (Step 5에서 충돌 검사를 추가하기 전까지는 경계를 넘을 수 있다.)
+
+**회전 (4×4 행렬 90도 시계 방향)**  
+4×4 행렬을 90도 시계 방향으로 회전하는 공식:
+```c
+new_shape[j][3 - i] = old_shape[i][j];   // i: 행, j: 열
+```
+
+**하드 드롭 (스페이스 키)**  
+스페이스를 누르면 블록이 충돌 없이 내려갈 수 있는 가장 아래 위치까지 즉시 이동한다.  
+(Step 5 충돌 감지 구현 후에 완성 가능)
 
 ### 작업 내용
-- [ ] `game.c` — `MoveTetromino(int dx, int dy)` 함수: x, y 좌표 변경
-- [ ] `game.c` — `RotateTetromino()` 함수: 행렬 90도 회전
-- [ ] `game.c` — 키 입력에 따라 이동/회전 함수 호출 연결
-- [ ] `game.c` — 이동/회전 시 지우고 → 변경 → 다시 그리는 순서 보장
+- [ ] `game.c` — `MoveTetromino(int dx, int dy)`: x, y 좌표 변경
+- [ ] `game.c` — `RotateTetromino()`: 4×4 행렬 90도 시계 방향 회전
+- [ ] `game.c` — `HardDrop()`: 스페이스 키로 즉시 최하단 낙하 (Step 5 이후 완성)
+- [ ] `game.c` — 키 입력과 각 함수 연결 (←→↓: 이동, ↑: 회전, Space: 하드 드롭)
+- [ ] `game.c` — 이동/회전 시 Erase → 변경 → Draw 순서 보장
 
 ### 완료 기준
 - 좌/우/아래 방향키로 블록이 이동한다.
@@ -212,68 +316,128 @@ I 블록:        O 블록:        T 블록:
 
 ---
 
-## Step 5 — 충돌 감지
+## Step 5 — 충돌 감지 ⬜
 
 ### 목표
-블록이 벽, 바닥, 또는 이미 고정된 블록과 겹치지 않도록 막는다.
+블록이 벽, 바닥, 이미 고정된 블록과 겹치지 않도록 막는다.
 
 ### 배경 지식
-- 이동/회전을 시도하기 전에 목적지 좌표가 유효한지 검사한다
-- 검사 실패 시 이동/회전을 취소한다 (좌표 원복)
-- 검사 대상: 보드 경계 이탈 여부 + 해당 보드 배열 칸이 이미 채워져 있는지
+이동/회전을 적용하기 전에 목적지 위치가 유효한지 미리 검사한다.  
+검사 실패 시 이동/회전을 취소하고 좌표를 원복한다.
+
+검사 대상:
+- 블록의 각 셀 좌표가 보드 범위(0~BOARD_COLS-1, 0~BOARD_ROWS-1) 안에 있는가
+- 해당 보드 배열 칸이 이미 채워져 있는가 (`board[row][col] != 0`)
+
+```c
+int IsValidPosition(ActiveBlock *ab) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (ab->tetromino.shape[i][j] == 0) continue;
+            int row = ab->y + i;
+            int col = ab->x + j;
+            if (col < 0 || col >= BOARD_COLS) return 0;  // 좌우 벽
+            if (row >= BOARD_ROWS) return 0;              // 바닥
+            if (board[row][col] != 0) return 0;           // 고정 블록
+        }
+    }
+    return 1;
+}
+```
 
 ### 작업 내용
-- [ ] `game.c` — `IsValidPosition(Tetromino *t)` 함수: 위치 유효성 검사
-- [ ] `game.c` — 이동 함수에서 검사 후 실패 시 원위치 복구
-- [ ] `game.c` — 회전 함수에서 검사 후 실패 시 회전 취소
+- [ ] `game.c` — `IsValidPosition(ActiveBlock *ab)`: 위치 유효성 검사
+- [ ] `game.c` — `MoveTetromino()` 에 검사 추가 → 실패 시 좌표 원복
+- [ ] `game.c` — `RotateTetromino()` 에 검사 추가 → 실패 시 회전 취소
+- [ ] `game.c` — `HardDrop()` 완성 (IsValidPosition으로 가장 아래 위치 탐색)
 
 ### 완료 기준
 - 블록이 보드 밖으로 나가지 않는다.
-- 블록이 고정된 블록 위로 겹쳐지지 않는다.
+- 고정된 블록 위로 겹쳐지지 않는다.
 - 회전 시 벽을 뚫지 않는다.
+- 스페이스 키로 즉시 최하단에 내려놓을 수 있다.
 
 ---
 
-## Step 6 — 블록 고정과 자동 낙하 (중력)
+## Step 6 — 블록 고정과 자동 낙하 (중력) ⬜
 
 ### 목표
 블록이 바닥 또는 다른 블록에 닿으면 고정되고, 시간이 지나면 자동으로 아래로 떨어진다.
 
 ### 배경 지식
-- 중력 구현: 일정 시간 간격마다 블록을 한 칸 아래로 이동 시도
-- 아래 이동이 불가능하면 → 블록을 보드 배열에 기록(고정) → 새 블록 스폰
-- macOS에서 시간 측정: `<time.h>`의 `clock()` 또는 `gettimeofday()` 사용
+
+**블록 고정**  
+아래 이동이 불가능한 경우, 현재 블록의 각 셀 좌표를 `board` 배열에 기록한다.  
+이 시점에 블록의 색상 정보도 함께 저장하면 나중에 색상을 유지한 채 보드를 렌더링할 수 있다.
+
+```c
+// board에 색상 인덱스를 저장하는 방식
+board[row][col] = (int)activeBlock.tetromino.color + 1;  // 0은 빈칸이므로 +1
+```
+
+**타이머 (자동 낙하)**  
+게임 루프 안에서 경과 시간을 측정해 일정 간격마다 블록을 한 칸 아래로 이동시킨다.  
+`gettimeofday()`로 현재 시각을 가져와 마지막 낙하 시각과 비교한다.
+
+```c
+#include <sys/time.h>
+
+struct timeval now;
+gettimeofday(&now, NULL);
+long elapsed_ms = (now.tv_sec - last.tv_sec) * 1000
+                + (now.tv_usec - last.tv_usec) / 1000;
+if (elapsed_ms >= drop_interval_ms) { /* 한 칸 낙하 */ }
+```
 
 ### 작업 내용
-- [ ] `game.c` — `LockTetromino()` 함수: 현재 블록 위치를 `board` 배열에 기록
-- [ ] `game.c` — `SpawnTetromino()` 함수: 새 블록을 상단 중앙에 생성
-- [ ] `game.c` — 게임 루프에 타이머 추가 (예: 500ms 간격으로 자동 하강)
-- [ ] `game.c` — 아래 이동 불가 시 고정 → 새 블록 스폰 흐름 연결
+- [ ] `game.c` — `LockTetromino()`: 현재 블록 위치를 `board[][]`에 기록
+- [ ] `game.c` — `SpawnTetromino()`: 새 블록을 상단 중앙에 생성
+- [ ] `game.c` — 게임 루프에 `gettimeofday()` 기반 타이머 추가
+- [ ] `game.c` — 일정 간격마다 자동 하강 (초기값 500ms)
+- [ ] `game.c` — 아래 이동 불가 시 LockTetromino → SpawnTetromino 흐름 연결
 
 ### 완료 기준
 - 블록이 자동으로 아래로 내려온다.
 - 바닥/블록에 닿으면 고정되고 새 블록이 나타난다.
-- 아래 방향키로 빠르게 내리기도 된다.
+- 아래 방향키로 빠르게 내리기가 된다.
+- 색상 정보가 보드에 저장되어 고정 후에도 색이 유지된다.
 
 ---
 
-## Step 7 — 라인 클리어와 점수
+## Step 7 — 라인 클리어와 점수 ⬜
 
 ### 목표
 가로줄이 꽉 차면 해당 줄을 지우고 위 블록을 내리며, 점수를 부여한다.
 
 ### 배경 지식
-- 블록이 고정될 때마다 모든 줄을 검사해 꽉 찬 줄을 찾는다
-- 꽉 찬 줄 삭제 후 위쪽 줄을 한 칸씩 아래로 복사
-- 점수: 한 번에 지운 줄 수에 따라 차등 부여 (1줄=100, 2줄=300, 3줄=500, 4줄=800)
-- 레벨: 지운 줄 수가 쌓이면 레벨 상승 → 낙하 속도 증가
+
+**라인 클리어 절차**  
+1. 블록 고정 직후, 모든 행을 아래에서 위 방향으로 검사
+2. 한 행의 모든 칸(`BOARD_COLS`개)이 채워졌으면 해당 행을 삭제
+3. 삭제된 행 위의 모든 행을 한 칸씩 아래로 복사
+
+**점수 계산 (테트리스 공식)**
+
+| 한 번에 지운 줄 수 | 점수 |
+|------|------|
+| 1줄 | 100 × 레벨 |
+| 2줄 | 300 × 레벨 |
+| 3줄 | 500 × 레벨 |
+| 4줄 (테트리스) | 800 × 레벨 |
+
+**레벨 업**  
+총 클리어한 줄 수가 `레벨 × 10`에 도달하면 레벨이 1 오르고, 낙하 속도가 빨라진다.
+
+```
+레벨별 낙하 간격 예시:
+레벨 1: 500ms, 레벨 2: 450ms, ..., 레벨 10: 100ms
+```
 
 ### 작업 내용
-- [ ] `game.c` — `CheckLines()` 함수: 꽉 찬 줄 탐색 및 삭제
-- [ ] `game.c` — `CollapseLines()` 함수: 삭제된 줄 위를 한 칸씩 내리기
-- [ ] `game.c` — 점수/레벨 전역 변수 추가
-- [ ] `game.c` — `DrawScore()` 함수: 점수, 레벨, 지운 줄 수 화면 출력
-- [ ] `game.c` — 레벨에 따라 낙하 속도(타이머 간격) 조정
+- [ ] `game.c` — `CheckAndClearLines()`: 꽉 찬 줄 탐색, 삭제, 위 블록 내리기
+- [ ] `game.c` — `score`, `level`, `lines_cleared` 전역 변수 추가
+- [ ] `game.c` — `DrawScore()`: 점수, 레벨, 클리어 줄 수를 보드 옆에 출력
+- [ ] `game.c` — 레벨에 따라 낙하 간격(`drop_interval_ms`) 조정
 
 ### 완료 기준
 - 줄이 꽉 차면 사라지고 위 블록이 내려온다.
@@ -282,25 +446,40 @@ I 블록:        O 블록:        T 블록:
 
 ---
 
-## Step 8 — 게임 오버와 다음 블록 미리보기
+## Step 8 — 게임 오버와 다음 블록 미리보기 ⬜
 
 ### 목표
 게임 오버 조건을 처리하고, 다음에 나올 블록을 미리 보여준다.
 
 ### 배경 지식
-- 게임 오버: 새 블록이 스폰될 위치에 이미 블록이 있으면 게임 종료
-- 다음 블록 미리보기: 현재 블록과 별도로 `next` 블록을 저장해 보드 옆에 출력
+
+**게임 오버 조건**  
+새 블록이 스폰되는 위치(보드 상단 중앙)에 이미 고정된 블록이 있으면 게임 종료.  
+즉, `SpawnTetromino()` 직후 `IsValidPosition()`이 실패하면 게임 오버다.
+
+**다음 블록 미리보기**  
+`SpawnTetromino()` 호출 시 현재 블록과 다음 블록을 동시에 결정해 저장한다.  
+다음 블록은 보드 오른쪽 옆의 별도 영역에 출력한다.
+
+**게임 초기화**  
+재시작 시 다음 상태를 초기화해야 한다:
+- `board[][]` → 전부 0
+- `score`, `level`, `lines_cleared` → 0
+- 현재 블록, 다음 블록 → 새로 스폰
+- 낙하 간격 → 초기값(500ms)
+- 타이머 → 현재 시각으로 리셋
 
 ### 작업 내용
-- [ ] `game.c` — `SpawnTetromino()` 에서 스폰 실패 시 게임 오버 처리
-- [ ] `game.c` — `DrawGameOver()` 함수: 게임 오버 메시지 출력
-- [ ] `game.c` — 재시작 기능 (R 키 등)
-- [ ] `game.c` — `next` 블록 전역 변수 추가
-- [ ] `game.c` — `DrawNextBlock()` 함수: 보드 옆 영역에 다음 블록 미리보기 출력
+- [ ] `game.c` — `SpawnTetromino()`에서 스폰 실패 시 게임 오버 상태 진입
+- [ ] `game.c` — `DrawGameOver()`: 게임 오버 메시지 및 재시작 안내 출력
+- [ ] `game.c` — `InitGame()`: 게임 전체 상태 초기화 함수
+- [ ] `game.c` — R 키로 `InitGame()` 호출해 재시작
+- [ ] `game.c` — `next_block` 변수 추가 (`SpawnTetromino()` 시 미리 결정)
+- [ ] `game.c` — `DrawNextBlock()`: 보드 오른쪽 영역에 다음 블록 미리보기 출력
 
 ### 완료 기준
 - 블록이 최상단을 넘으면 게임 오버 메시지가 표시된다.
-- R 키를 누르면 게임이 초기화되어 재시작된다.
+- R 키로 게임이 완전히 초기화되어 재시작된다.
 - 보드 옆에 다음 블록이 미리 표시된다.
 
 ---
@@ -309,8 +488,9 @@ I 블록:        O 블록:        T 블록:
 
 | 파일 | 담당 |
 |------|------|
-| `console.c/h` | 터미널 유틸 (커서, 색상) — 건드릴 일 적음 |
-| `game.c/h` | 게임 전체 로직 (보드, 블록, 점수, 루프) |
+| `console.c / .h` | 터미널 유틸 — 커서 이동, 색상, 커서 표시/숨김 |
+| `block.c / .h` | 테트로미노 데이터 — 7종 블록 형태·색상 정의 (Step 3에서 분리) |
+| `game.c / .h` | 게임 전체 로직 — 보드, 블록 이동, 충돌, 점수, 루프 |
 | `main.c` | 진입점만 — `RunGame()` 호출 |
 
 ## 참고 — 빌드 방법
