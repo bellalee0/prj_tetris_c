@@ -7,6 +7,7 @@ add_executable(tetris
     tetris/main.c
     tetris/console.c
     tetris/game.c
+    tetris/block.c
 )
 
 target_include_directories(tetris PRIVATE tetris)
