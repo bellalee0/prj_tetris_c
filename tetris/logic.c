@@ -21,7 +21,7 @@ ActiveBlock SpawnTetromino(void) {
 
     ActiveBlock activeBlock = {
         .tetromino = tetromino,
-        .x = BOARD_ORIGIN_X + BOARD_COLS / 2,
+        .x = BOARD_ORIGIN_X + 1 + (BOARD_COLS - 4) / 2 * 2,
         .y = BOARD_ORIGIN_Y
     };
 
