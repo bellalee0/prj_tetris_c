@@ -168,7 +168,13 @@ void RunGame(void) {
         ActiveBlock tetromino = SpawnTetromino();
 
         DrawTetromino(tetromino);
+        
+        #ifdef _WIN32
         Sleep(5000);
+        #else
+        sleep(4);
+        #endif
+
         EraseTetromino(tetromino);
     }
 }
