@@ -1,8 +1,9 @@
-#ifndef LOGIC_H
+﻿#ifndef LOGIC_H
 #define LOGIC_H
 
 #include "block.h"
 
 ActiveBlock SpawnTetromino(void);
+ActiveBlock MoveTetromino(ActiveBlock activeBlock, int dx, int dy);
 
 #endif

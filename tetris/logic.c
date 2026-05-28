@@ -1,4 +1,4 @@
-#include "logic.h"
+﻿#include "logic.h"
 #include "game.h"
 
 #include <stdlib.h>
@@ -24,6 +24,14 @@ ActiveBlock SpawnTetromino(void) {
         .x = BOARD_ORIGIN_X + 1 + (BOARD_COLS - 4) / 2 * 2,
         .y = BOARD_ORIGIN_Y
     };
+
+    return activeBlock;
+}
+
+ActiveBlock MoveTetromino(ActiveBlock activeBlock, int dx, int dy) {
+    
+    activeBlock.x = dx;
+    activeBlock.y = dy;
 
     return activeBlock;
 }

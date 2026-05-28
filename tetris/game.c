@@ -1,4 +1,4 @@
-#include "game.h"
+﻿#include "game.h"
 #include "console.h"
 #include "render.h"
 #include "logic.h"
@@ -35,9 +35,19 @@ void RunGame(void) {
         DrawTetromino(tetromino);
 
         #ifdef _WIN32
-        Sleep(5000);
+        Sleep(2000);
         #else
         sleep(5);
+        #endif
+
+        EraseTetromino(tetromino);
+        tetromino = MoveTetromino(tetromino, tetromino.x + 2, tetromino.y + 1);
+        DrawTetromino(tetromino);
+
+        #ifdef _WIN32
+                Sleep(2000);
+        #else
+                sleep(5);
         #endif
 
         EraseTetromino(tetromino);
