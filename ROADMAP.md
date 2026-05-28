@@ -155,7 +155,7 @@ if (select(1, &fds, NULL, NULL, &tv) <= 0) return -1;  // 입력 없음
 
 ### 작업 내용
 - [x] **`console.c` — macOS `TextColor()` ANSI 매핑 테이블 추가 및 적용** *(버그 수정)*
-- [ ] `input.c` — macOS `GetKey()`를 `select()` 기반 non-blocking으로 교체
+- [x] `input.c` — macOS `GetKey()`를 `select()` 기반 non-blocking으로 교체
 - [ ] `game.c` — ESC 또는 Q 키 입력 시 게임 루프 종료 및 터미널 상태 복구
 
 ### 완료 기준
