@@ -8,6 +8,8 @@
 #define BOARD_ORIGIN_X 2
 #define BOARD_ORIGIN_Y 1
 
+extern int board[BOARD_ROWS][BOARD_COLS];
+
 void RunGame(void);
 
 #endif

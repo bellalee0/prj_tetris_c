@@ -1,0 +1,29 @@
+#include "logic.h"
+#include "game.h"
+
+#include <stdlib.h>
+
+ActiveBlock SpawnTetromino(void) {
+
+    int block_type = rand() % 7;
+
+    Tetromino tetromino;
+
+    switch (block_type) {
+        case 0: tetromino = BLOCK_I; break;
+        case 1: tetromino = BLOCK_O; break;
+        case 2: tetromino = BLOCK_T; break;
+        case 3: tetromino = BLOCK_J; break;
+        case 4: tetromino = BLOCK_L; break;
+        case 5: tetromino = BLOCK_S; break;
+        case 6: tetromino = BLOCK_Z; break;
+    }
+
+    ActiveBlock activeBlock = {
+        .tetromino = tetromino,
+        .x = BOARD_ORIGIN_X + BOARD_COLS / 2,
+        .y = BOARD_ORIGIN_Y
+    };
+
+    return activeBlock;
+}
