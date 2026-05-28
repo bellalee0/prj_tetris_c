@@ -45,7 +45,7 @@ void RunGame(void) {
         DrawTetromino(tetromino);
 
         #ifdef _WIN32
-                Sleep(2000);
+                Sleep(1000);
         #else
                 sleep(5);
         #endif
@@ -55,9 +55,19 @@ void RunGame(void) {
         DrawTetromino(tetromino);
 
         #ifdef _WIN32
-                        Sleep(2000);
+                        Sleep(1000);
         #else
                         sleep(5);
+        #endif
+
+        EraseTetromino(tetromino);
+        tetromino = HardDrop(tetromino);
+        DrawTetromino(tetromino);
+
+        #ifdef _WIN32
+                                Sleep(1000);
+        #else
+                                sleep(5);
         #endif
 
         EraseTetromino(tetromino);

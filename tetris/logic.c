@@ -49,3 +49,10 @@ ActiveBlock RotateTetromino(ActiveBlock activeBlock) {
 
     return newBlock;
 }
+
+ActiveBlock HardDrop(ActiveBlock activeBlock) {
+
+    activeBlock.y = BOARD_ROWS - 1;
+
+    return activeBlock;
+}
