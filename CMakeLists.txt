@@ -11,6 +11,12 @@ add_executable(tetris
     tetris/render.c
     tetris/logic.c
     tetris/game.c
+    tetris/console.h
+    tetris/block.h
+    tetris/input.h
+    tetris/render.h
+    tetris/logic.h
+    tetris/game.h
 )
 
 target_include_directories(tetris PRIVATE tetris)
