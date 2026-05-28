@@ -2,6 +2,25 @@
 #include "console.h"
 #include <stdio.h>
 
+int ANSI_COLOR[16] = {
+	30, // BLACK
+	34, // DARKBLUE
+	32, // DARKGREEN
+	36, // DARKSKYBLUE
+	31, // DARKRED
+	35, // DARKPURPLE
+	33, // DARKYELLOW
+	37, // GRAY
+	90, // DARKGRAY
+	94, // BLUE
+	92, // GREEN
+	96, // SKYBLUE
+	91, // RED
+	95, // PURPLE
+	93, // YELLOW
+	97  // WHITE
+};
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -43,7 +62,7 @@ void CursorView(char show) {
 }
 
 void TextColor(Color color) {
-    printf("\033[%dm", color);
+    printf("\033[%dm", ANSI_COLOR[color]);
     fflush(stdout);
 }
 

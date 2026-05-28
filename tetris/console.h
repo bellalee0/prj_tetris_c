@@ -20,6 +20,8 @@ typedef enum {
 	WHITE
 } Color;
 
+extern int ANSI_COLOR[16];
+
 void GotoXY(int x, int y);
 void CursorView(char show);
 void TextColor(Color color);
