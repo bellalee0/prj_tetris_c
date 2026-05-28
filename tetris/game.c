@@ -51,5 +51,15 @@ void RunGame(void) {
         #endif
 
         EraseTetromino(tetromino);
+        tetromino = RotateTetromino(tetromino);
+        DrawTetromino(tetromino);
+
+        #ifdef _WIN32
+                        Sleep(2000);
+        #else
+                        sleep(5);
+        #endif
+
+        EraseTetromino(tetromino);
     }
 }

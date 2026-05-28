@@ -35,3 +35,17 @@ ActiveBlock MoveTetromino(ActiveBlock activeBlock, int dx, int dy) {
 
     return activeBlock;
 }
+
+ActiveBlock RotateTetromino(ActiveBlock activeBlock) {
+
+    ActiveBlock newBlock = activeBlock;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+
+            newBlock.tetromino.shape[i][j] = activeBlock.tetromino.shape[4 - j - 1][i];
+        }
+    }
+
+    return newBlock;
+}
