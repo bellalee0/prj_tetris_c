@@ -6,8 +6,9 @@
 #include <conio.h>
 #include <Windows.h>
 #else
-#include <termios.h>
 #include <unistd.h>
+#include <sys/select.h>
+#include <sys/time.h>
 #endif
 
 int GetKey(void) {
@@ -19,19 +20,11 @@ int GetKey(void) {
     return -1;
 
 #else
-    struct termios oldt, newt;
-
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-
-    newt.c_lflag &= ~(ICANON | ECHO);
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    int ch = getchar();
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
-    return ch;
+    struct timeval tv = { 0, 0 };
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    if (select(1, &fds, NULL, NULL, &tv) <= 0) return -1;
+    return getchar();
 #endif
 }

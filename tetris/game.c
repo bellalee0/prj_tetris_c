@@ -10,11 +10,20 @@
 #include <Windows.h>
 #else
 #include <unistd.h>
+#include <termios.h>
 #endif
 
 int board[BOARD_ROWS][BOARD_COLS];
 
 void RunGame(void) {
+
+#ifndef _WIN32
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+#endif
 
     srand(time(NULL));
     CursorView(0);
