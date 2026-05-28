@@ -147,39 +147,8 @@ FD_SET(STDIN_FILENO, &fds);
 if (select(1, &fds, NULL, NULL, &tv) <= 0) return -1;  // 입력 없음
 ```
 
-> **⚠️ 버그 — `TextColor()` ANSI 코드 매핑 오류** (`console.c`)
->
-> 현재 macOS `TextColor()`는 `Color` enum 값을 그대로 ANSI 코드로 사용한다:
-> ```c
-> printf("\033[%dm", color);  // YELLOW(14) → \033[14m (교체 모드), 의도와 다름
-> ```
-> ANSI 전경색 코드는 `30`~`37` (기본), `90`~`97` (밝은 색) 범위를 사용한다.  
-> `Color` enum 값(0~15)과 ANSI 코드는 별도의 매핑 테이블이 필요하다.
->
-> ```c
-> // Color enum → ANSI 전경색 코드 매핑 예시
-> static const int ANSI_COLOR_MAP[] = {
->     30,  // BLACK       → 검정
->     34,  // DARKBLUE    → 파랑
->     32,  // DARKGREEN   → 초록
->     36,  // DARKSKYBLUE → 청록
->     31,  // DARKRED     → 빨강
->     35,  // DARKPURPLE  → 보라
->     33,  // DARKYELLOW  → 노랑(어두운)
->     37,  // GRAY        → 흰색(어두운)
->     90,  // DARKGRAY    → 밝은 검정
->     94,  // BLUE        → 밝은 파랑
->     92,  // GREEN       → 밝은 초록
->     96,  // SKYBLUE     → 밝은 청록
->     91,  // RED         → 밝은 빨강
->     95,  // PURPLE      → 밝은 보라
->     93,  // YELLOW      → 밝은 노랑
->     97,  // WHITE       → 밝은 흰색
-> };
-> ```
-
 ### 작업 내용
-- [ ] **`console.c` — macOS `TextColor()` ANSI 매핑 테이블 추가 및 적용** *(버그 수정)*
+- [x] **`console.c` — macOS `TextColor()` ANSI 매핑 테이블 추가 및 적용** *(버그 수정)*
 - [ ] `game.c` — macOS `GetKey()`를 `select()` 기반 non-blocking으로 교체
 - [ ] `game.c` — ESC 또는 Q 키 입력 시 게임 루프 종료 및 터미널 상태 복구
 
@@ -234,32 +203,6 @@ J 블록 (DARKBLUE):    L 블록 (DARKYELLOW): S 블록 (GREEN):     Z 블록 (R
 0 0 0 0               0 0 0 0              0 0 0 0             0 0 0 0
 ```
 
-> **⚠️ 버그 — `block.h`에 변수를 직접 정의** (`block.h`)
->
-> 현재 `block.h`에 `Tetromino BLOCK_I = { ... }` 형태로 변수를 직접 정의하고 있다.  
-> `.h` 파일을 여러 `.c` 파일에서 `#include`하면 변수가 중복 정의되어 **링크 에러**가 발생한다.
->
-> ```
-> 올바른 방법:
->   block.h → extern Tetromino BLOCK_I;    // 선언만 (존재를 알림)
->   block.c → Tetromino BLOCK_I = { ... }; // 정의 (실제 메모리 할당)
-> ```
-
-> **⚠️ 버그 — `DrawTetromino` / `EraseTetromino` 좌표 스케일 오류** (`game.c`)
->
-> `■`(전각 문자)는 터미널에서 2칸 폭을 차지한다.  
-> 현재 코드는 `x + j`로 1칸씩만 이동하기 때문에 가로로 인접한 셀들이 겹쳐서 출력된다.
->
-> ```c
-> // 현재 (버그):
-> GotoXY(activeBlock.x + j, activeBlock.y + i);
->
-> // 수정 후:
-> GotoXY(activeBlock.x + j * 2, activeBlock.y + i);
-> ```
->
-> `EraseTetromino`도 동일하게 수정해야 한다.
-
 ### 구현 현황
 - [x] `block.h` — `Tetromino` 구조체 정의: `shape[4][4]`, `color`
 - [x] `block.h` — `ActiveBlock` 구조체 정의: `tetromino`, `x`, `y`
@@ -268,11 +211,11 @@ J 블록 (DARKBLUE):    L 블록 (DARKYELLOW): S 블록 (GREEN):     Z 블록 (R
 - [x] `game.c` — `EraseTetromino()`: 블록을 지우기
 
 ### 남은 작업 (리팩토링 포함)
-- [ ] **`block.c` 파일 생성 — 블록 변수 정의를 헤더에서 분리** *(버그 수정)*
-- [ ] **`block.h` — 블록 변수를 `extern` 선언으로 변경** *(버그 수정)*
-- [ ] **`CMakeLists.txt` — `tetris/block.c` 추가** *(버그 수정)*
-- [ ] **`game.c` — `DrawTetromino()`, `EraseTetromino()` 좌표 스케일 버그 수정 (`j * 2`)** *(버그 수정)*
-- [ ] `game.c` — `SpawnTetromino()`: 7종 중 랜덤으로 선택해 보드 상단 중앙에 생성
+- [x] **`block.c` 파일 생성 — 블록 변수 정의를 헤더에서 분리** *(버그 수정)*
+- [x] **`block.h` — 블록 변수를 `extern` 선언으로 변경** *(버그 수정)*
+- [x] **`CMakeLists.txt` — `tetris/block.c` 추가** *(버그 수정)*
+- [x] **`game.c` — `DrawTetromino()`, `EraseTetromino()` 좌표 스케일 버그 수정 (`j * 2`)** *(버그 수정)*
+- [x] `game.c` — `SpawnTetromino()`: 7종 중 랜덤으로 선택해 보드 상단 중앙에 생성
 
 ### 완료 기준
 - 실행하면 보드 상단에 랜덤 블록이 하나 표시된다.
