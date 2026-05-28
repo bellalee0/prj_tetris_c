@@ -101,6 +101,7 @@ void DrawTetromino(ActiveBlock activeBlock) {
             }
         }
     }
+    fflush(stdout);
 }
 
 // EraseTetromino: 블록 지우기
@@ -115,12 +116,11 @@ void EraseTetromino(ActiveBlock activeBlock) {
             }
         }
     }
+    fflush(stdout);
 }
 
 // SpawnTetromino: 7종 중 랜덤 블록 생성
 ActiveBlock SpawnTetromino() {
-
-    srand(time(NULL));
 
     int block_type = rand() % 7;
 
@@ -161,6 +161,7 @@ ActiveBlock SpawnTetromino() {
 
 void RunGame(void) {
 
+    srand(time(NULL));
     CursorView(0);
     DrawBorder();
 
@@ -172,7 +173,7 @@ void RunGame(void) {
         #ifdef _WIN32
         Sleep(5000);
         #else
-        sleep(4);
+        sleep(5);
         #endif
 
         EraseTetromino(tetromino);
