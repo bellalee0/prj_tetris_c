@@ -1,13 +1,15 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#define LEFT  75
-#define RIGHT 77
-#define UP    72
-#define DOWN  80
-#define ARROW 224
-#define ENTER 13
+typedef enum {
+    KEY_NONE,
+    KEY_LEFT,
+    KEY_RIGHT,
+    KEY_ROTATE,
+    KEY_HARD_DROP,
+    KEY_QUIT
+} GameKey;
 
-int GetKey(void);
+GameKey GetKey(void);
 
 #endif

@@ -2,6 +2,7 @@
 #include "console.h"
 #include "render.h"
 #include "logic.h"
+#include "input.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -34,41 +35,16 @@ void RunGame(void) {
 
         DrawTetromino(tetromino);
 
-        #ifdef _WIN32
-        Sleep(2000);
-        #else
-        sleep(5);
-        #endif
-
+        GameKey key = GetKey();
         EraseTetromino(tetromino);
-        tetromino = MoveTetromino(tetromino, tetromino.x + 2, tetromino.y + 1);
-        DrawTetromino(tetromino);
-
-        #ifdef _WIN32
-                Sleep(1000);
-        #else
-                sleep(5);
-        #endif
-
-        EraseTetromino(tetromino);
-        tetromino = RotateTetromino(tetromino);
-        DrawTetromino(tetromino);
-
-        #ifdef _WIN32
-                        Sleep(1000);
-        #else
-                        sleep(5);
-        #endif
-
-        EraseTetromino(tetromino);
-        tetromino = HardDrop(tetromino);
-        DrawTetromino(tetromino);
-
-        #ifdef _WIN32
-                                Sleep(1000);
-        #else
-                                sleep(5);
-        #endif
+        switch (key) {
+            case KEY_NONE: break;
+            case KEY_LEFT: tetromino = MoveTetromino(tetromino, tetromino.x - 1, tetromino.y); break;
+            case KEY_RIGHT: tetromino = MoveTetromino(tetromino, tetromino.x + 1, tetromino.y); break;
+            case KEY_ROTATE: tetromino = RotateTetromino(tetromino); break;
+            case KEY_HARD_DROP: tetromino = HardDrop(tetromino); break;
+            case KEY_QUIT: break;
+        }
 
         EraseTetromino(tetromino);
     }
